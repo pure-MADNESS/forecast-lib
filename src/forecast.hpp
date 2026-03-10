@@ -1,6 +1,10 @@
 #ifndef __FORECAST_HPP__
 #define __FORECAST_HPP__
 
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+
+#include <httplib.h>
+#include <nlohmann/json.hpp>
 #include<vector>
 
 using namespace std;

@@ -1,9 +1,6 @@
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 //#include "httplib.h"
 //#include "json.hpp"
 
-#include <nlohmann/json.hpp>
-#include <httplib.h>
 #include "forecast.hpp"
 
 using json = nlohmann::json;
