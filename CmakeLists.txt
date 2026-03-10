@@ -12,6 +12,7 @@ FetchContent_Declare(httplib
 )
 FetchContent_MakeAvailable(httplib)
 
+find_package(nlohmann_json QUIET)
 find_package(OpenSSL REQUIRED)
 
 add_library(forecast STATIC
