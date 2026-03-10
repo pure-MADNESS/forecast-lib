@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef __FORECAST_HPP__
+#define __FORECAST_HPP__
 
 #include<vector>
 
@@ -18,3 +19,5 @@ WeatherData fetchWeather(double lat, double lon, int forecast_days = 1);
 double SolarWheight(double cloud_cover, double direct_normal_irradiance);
 double WindWheight(double wind_speed_10m);
 double PrecipitationWheight(double precipitation);
+
+#endif
