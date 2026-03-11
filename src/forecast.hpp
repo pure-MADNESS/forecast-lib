@@ -1,7 +1,7 @@
 #ifndef __FORECAST_HPP__
 #define __FORECAST_HPP__
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
+// #define CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include <httplib.h>
 #include <nlohmann/json.hpp>
