@@ -8,7 +8,7 @@ using json = nlohmann::json;
 WeatherData fetchWeather(double lat, double lon, int forecast_days){
     WeatherData data;
 
-    httplib::Client cli("https://api.open-meteo.com");
+    httplib::Client cli("http://api.open-meteo.com");
     // GIUSTO ✅
 string url = "/v1/forecast?latitude=" + to_string(lat) + "&longitude=" + to_string(lon) + 
              "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation&forecast_days=" + to_string(forecast_days);

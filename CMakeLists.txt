@@ -20,6 +20,7 @@ add_library(forecast STATIC
     src/forecast.cpp
     src/forecast.hpp)
 
+target_compile_definitions(forecast PUBLIC CPPHTTPLIB_OPENSSL_SUPPORT)
 target_include_directories(forecast PUBLIC src)
 
 target_link_libraries(forecast PUBLIC 
