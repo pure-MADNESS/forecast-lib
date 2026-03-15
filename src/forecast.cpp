@@ -39,7 +39,6 @@ P_eff /= static_cast<double>(n_hours); // media oraria
 
 
 
-
 double getPast7DaysPrecipSum(const std::vector<double>& daily_precip_sum) {
     if (daily_precip_sum.empty()) return 0.0;
     double sum = 0.0;
