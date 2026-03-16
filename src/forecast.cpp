@@ -20,7 +20,7 @@ struct BasinParameters {
 
 
 
-double EstimatedFlow(double precipitation_mm,double precipitation_7d_mm,const BasinParameters& params) {
+double EstimatedFlow(double <vector>precipitation_mm,double precipitation_7d_mm,const BasinParameters& params) {
 
 double wetness_f = min(1.0, precipitation_7d_mm / 100.0); // più piove nei giorni precedenti, più il terreno è bagnato
 double C_eff = params.C_secco + (params.C_bagnato - params.C_secco) * wetness_f; // interpolazione lineare
