@@ -20,37 +20,44 @@ struct BasinParameters {
 
 
 
-double EstimatedFlow(const vector <double>& precipitation_mm, double precipitation_7d_mm, const BasinParameters& params) {
-
-double wetness_f = min(1.0, precipitation_7d_mm / 100.0); // più piove nei giorni precedenti, più il terreno è bagnato
-double C_eff = params.C_secco + (params.C_bagnato - params.C_secco) * wetness_f; // interpolazione lineare
-
-double P_eff = 0.0;
-int n_hours = min(24, params.tc_h); // consideriamo solo le ultime tc_h ore
-for(int i = 0; i < n_hours; ++i) {
-    P_eff += precipitation_mm[i]; // semplificazione: tutta la pioggia contribuisce, in realtà dovrebbe essere decrescente nel tempo
-}
-P_eff /= static_cast<double>(n_hours); // media oraria
-
-    double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
-    
-    return params.Q_base_m3s + Q_runoff;
-
-}
 
 
-
-double getPast7DaysPrecipSum(const std::vector<double>& daily_precip_sum) {
+double getPast7DaysPrecipSum(const vector<double>& daily_precip_sum) {
     if (daily_precip_sum.empty()) return 0.0;
     double sum = 0.0;
     size_t n = daily_precip_sum.size();
-    size_t start = std::max(0, static_cast<int>(n) - 8);  // 7 gg prima di ieri
-    size_t end = std::max(0, static_cast<int>(n) - 1);    // fino a ieri
+    size_t start = max(0, static_cast<int>(n) - 8);  // 7 gg prima di ieri
+    size_t end = max(0, static_cast<int>(n) - 1);    // fino a ieri
     for (size_t i = start; i < end; ++i) {
         sum += daily_precip_sum[i];
     }
     return sum;
 }
+
+
+vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
+                                         double past_7d_mm,
+                                         const BasinParameters& params) {
+    vector<double> Q(24, params.Q_base_m3s);
+    double wetness_f = min(1.0, past_7d_mm / 100.0);
+    double C_eff = params.C_secco + (params.C_bagnato - params.C_secco) * wetness_f;
+    
+    // 👉 USA tc_h e area!
+    int lag = params.tc_h;  // Tempo concentrazione
+    vector<double> weights(lag, 1.0 / lag);  // Uniforme semplice, o triangolare
+    
+    for (int t = 0; t < 24; ++t) {
+        double P_eff = 0.0;
+        for (int i = 0; i < lag && (t + i) < hourly_precip.size(); ++i) {
+            P_eff += weights[i] * hourly_precip[t];  // O shift: hourly_precip[t-i]
+        }
+        // 👉 Formula tua: (C * P_eff * area *1e6)/3.6e6
+        double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
+        Q[t] = params.Q_base_m3s + Q_runoff;
+    }
+    return Q;
+}
+
 
 
 
@@ -75,8 +82,6 @@ auto res = cli.Get(url.c_str());
         data.past_day_precipitation = json_data["daily"]["precipitation_sum"].get<vector<double>>(); 
 
 
-
-        data.past_7d_precip_mm = getPast7DaysPrecipSum(data.past_day_precipitation);
         data.estimated_flow_m3s = EstimatedFlow(data.precipitation, data.past_7d_precip_mm, BasinParameters());
 
 
