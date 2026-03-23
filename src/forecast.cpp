@@ -69,7 +69,7 @@ WeatherData fetchWeather(double lat, double lon, int forecast_days){
     httplib::Client cli("http://api.open-meteo.com");
     // GIUSTO ✅
 string url = "/v1/forecast?latitude=" + to_string(lat) + "&longitude=" + to_string(lon) + 
-             "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation&forecast_days=" + "&daily=precipitation_sum&" +"past_days=7"+"forecast_days=" + to_string(forecast_days);
+             "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation&forecast_days=" + "&daily=precipitation_sum&" +"&past_days=7"+"&forecast_days=" + to_string(forecast_days);
 auto res = cli.Get(url.c_str());
 
     if (res && res->status == 200) {
