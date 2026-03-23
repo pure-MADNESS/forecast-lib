@@ -81,6 +81,7 @@ auto res = cli.Get(url.c_str());
         data.precipitation = json_data["hourly"]["precipitation"].get<vector<double>>();
         data.past_day_precipitation = json_data["daily"]["precipitation_sum"].get<vector<double>>(); 
 
+        data.past_7d_precip_mm = getPast7DaysPrecipSum(data.past_day_precipitation);
 
         data.estimated_flow_m3s = EstimatedFlow(data.precipitation, data.past_7d_precip_mm, BasinParameters());
 
