@@ -68,8 +68,12 @@ WeatherData fetchWeather(double lat, double lon, int forecast_days){
 
     httplib::Client cli("http://api.open-meteo.com");
     // GIUSTO ✅
-string url = "/v1/forecast?latitude=" + to_string(lat) + "&longitude=" + to_string(lon) + 
-             "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation&forecast_days=" + "&daily=precipitation_sum&" +"&past_days=7"+"&forecast_days=" + to_string(forecast_days);
+string url = "/v1/forecast?latitude=" + to_string(lat) +
+             "&longitude=" + to_string(lon) +
+             "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation" +
+             "&daily=precipitation_sum" +
+             "&past_days=7" +
+             "&forecast_days=1";
 auto res = cli.Get(url.c_str());
 
     if (res && res->status == 200) {
@@ -82,6 +86,8 @@ auto res = cli.Get(url.c_str());
         data.past_day_precipitation = json_data["daily"]["precipitation_sum"].get<vector<double>>(); 
 
         data.past_7d_precip_mm = getPast7DaysPrecipSum(data.past_day_precipitation);
+
+        
 
         data.estimated_flow_m3s = EstimatedFlow(data.precipitation, data.past_7d_precip_mm, BasinParameters());
 
