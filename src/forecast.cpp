@@ -22,18 +22,38 @@ struct BasinParameters {
 
 
 
-double getPast7DaysPrecipSum(const vector<double>& daily_precip_sum) {
-    if (daily_precip_sum.empty()) return 0.0;
-    double sum = 0.0;
-    size_t n = daily_precip_sum.size();
-    size_t start = max(0, static_cast<int>(n) - 8);  // 7 gg prima di ieri
-    size_t end = max(0, static_cast<int>(n) - 1);    // fino a ieri
-    for (size_t i = start; i < end; ++i) {
-        sum += daily_precip_sum[i];
+double getPast7DaysPrecipSum(double lat, double lon) {
+    httplib::Client cli("http://api.open-meteo.com");
+
+    string url = "/v1/forecast?latitude=" + to_string(lat) +
+                 "&longitude=" + to_string(lon) +
+                 "&daily=precipitation_sum" +
+                 "&past_days=7";
+
+    auto res = cli.Get(url.c_str());
+
+    if (!res || res->status != 200) {
+        throw runtime_error("Failed to fetch past precipitation data");
     }
+
+    auto json_data = nlohmann::json::parse(res->body);
+
+    if (!json_data.contains("daily") ||
+        !json_data["daily"].contains("precipitation_sum")) {
+        return 0.0;
+    }
+
+    vector<double> daily_precip =
+        json_data["daily"]["precipitation_sum"].get<vector<double>>();
+
+    // 👉 somma semplice (sono già 7 giorni!)
+    double sum = 0.0;
+    for (double v : daily_precip) {
+        sum += v;
+    }
+
     return sum;
 }
-
 
 vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
                                          double past_7d_mm,
@@ -46,15 +66,17 @@ vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
     int lag = params.tc_h;  // Tempo concentrazione
     vector<double> weights(lag, 1.0 / lag);  // Uniforme semplice, o triangolare
     
-    for (int t = 0; t < 24; ++t) {
-        double P_eff = 0.0;
-        for (int i = 0; i < lag && (t + i) < hourly_precip.size(); ++i) {
-            P_eff += weights[i] * hourly_precip[t];  // O shift: hourly_precip[t-i]
+   for (int t = 0; t < 24; ++t) {
+    double P_eff = 0.0;
+    for (int i = 0; i < lag; ++i) {
+        if (t >= i) {
+            P_eff += weights[i] * hourly_precip[t - i];
         }
-        // 👉 Formula tua: (C * P_eff * area *1e6)/3.6e6
-        double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
-        Q[t] = params.Q_base_m3s + Q_runoff;
     }
+
+    double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
+    Q[t] = params.Q_base_m3s + Q_runoff;
+}
     return Q;
 }
 
@@ -63,17 +85,17 @@ vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
 
 
 
-WeatherData fetchWeather(double lat, double lon, int forecast_days){
+
+
+WeatherData fetchWeather(double lat, double lon, int forecast_days){ //forcast_days non usato, ma potrebbe essere utile per estendere la funzionalità a più giorni
     WeatherData data;
 
     httplib::Client cli("http://api.open-meteo.com");
     // GIUSTO ✅
 string url = "/v1/forecast?latitude=" + to_string(lat) +
-             "&longitude=" + to_string(lon) +
-             "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation" +
-             "&daily=precipitation_sum" +
-             "&past_days=7" +
-             "&forecast_days=1";
+                      "&longitude=" + to_string(lon) +
+                      "&hourly=temperature_2m,wind_speed_10m,cloud_cover,direct_normal_irradiance,precipitation" +
+                      "&forecast_days=1";
 auto res = cli.Get(url.c_str());
 
     if (res && res->status == 200) {
@@ -83,9 +105,9 @@ auto res = cli.Get(url.c_str());
         data.cloud_cover = json_data["hourly"]["cloud_cover"].get<vector<double>>();
         data.direct_normal_irradiance = json_data["hourly"]["direct_normal_irradiance"].get<vector<double>>();
         data.precipitation = json_data["hourly"]["precipitation"].get<vector<double>>();
-        data.past_day_precipitation = json_data["daily"]["precipitation_sum"].get<vector<double>>(); 
+        
 
-        data.past_7d_precip_mm = getPast7DaysPrecipSum(data.past_day_precipitation);
+        data.past_7d_precip_mm = getPast7DaysPrecipSum(lat, lon);
 
         
 

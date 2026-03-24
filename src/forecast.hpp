@@ -17,9 +17,10 @@ struct WeatherData{
     vector<double> direct_normal_irradiance;
     vector<double> precipitation;
     vector<double> past_day_precipitation;
-
-    double past_7d_precip_mm = 0.0;      
     vector<double> estimated_flow_m3s;  
+    
+    double past_7d_precip_mm = 0.0;      
+    
     
 };
 
