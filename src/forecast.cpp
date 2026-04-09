@@ -14,7 +14,7 @@ struct BasinParameters {
     double area_km2 = 170.0; // area in km² del Fersina
     double C_secco = 0.2; // coeff di runoff per terreno secco
     double C_bagnato = 0.7; // coeff di runoff per terreno bagnato
-    double Q_base_m3s = 0.2; // flusso de fiume a secco
+    double Q_base_m3s = 0.5; // flusso de fiume a secco
     int tc_h = 6; // tempo di concentraz.
 };
 
