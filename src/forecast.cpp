@@ -14,7 +14,7 @@ struct BasinParameters {
     double area_km2 = 170.0; // area in km² del Fersina
     double C_secco = 0.2; // coeff di runoff per terreno secco
     double C_bagnato = 0.7; // coeff di runoff per terreno bagnato
-    double Q_base_m3s = 0.15; // flusso de fiume a secco
+    double Q_base_m3s = 0.07; // flusso de fiume a secco
     int tc_h = 6; // tempo di concentraz.
 };
 
@@ -75,7 +75,7 @@ vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
     }
 
     double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
-    Q[t] = params.Q_base_m3s + Q_runoff*0.2;
+    Q[t] = params.Q_base_m3s + Q_runoff*0.15;
 }
     return Q;
 }
