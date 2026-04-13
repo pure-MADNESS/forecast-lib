@@ -75,7 +75,7 @@ vector<double> EstimatedFlow(const vector<double>& hourly_precip,  // 168h
     }
 
     double Q_runoff = (C_eff * P_eff * params.area_km2 * 1e6) / 3.6e6;
-    Q[t] = params.Q_base_m3s + Q_runoff*0.15;
+    Q[t] = params.Q_base_m3s + Q_runoff*0.09; // 0.09 è un coefficiente di conversione empirico per adattare alla scala del Fersina
 }
     return Q;
 }
